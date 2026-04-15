@@ -130,40 +130,18 @@ aₙ bₙ
 
 ---
 
-## Запуск тестов
-
-Тест-файл `ElGamalTests.cs` — автономный, не требует xUnit.  
-Создайте отдельный консольный проект или добавьте в существующий:
-
-```bash
-cd ElGamalLab
-dotnet new console -n Tests
-cp ElGamalTests.cs Tests/
-# Скопируйте туда ElGamalCipher.cs и запустите:
-cd Tests && dotnet run
-```
-
-Тесты проверяют:
-- Быстрое возведение в степень (пример из учебника: 7^5 mod 13 = 11)
-- Проверку простоты
-- Разложение на простые множители
-- Нахождение всех первообразных корней
-- Полный пример из учебника (стр. 18): p=13, g=7, x=5, k=7, m=4 → (a=6, b=8)
-- Шифрование/дешифрование всех байтов при p=41
-
----
 
 ## Структура проекта
 
 ```
 ElGamalLab/
-├── ElGamalLab/
-│   ├── ElGamalLab.csproj    ← проект (.NET 8 + Avalonia)
-│   ├── Program.cs            ← точка входа
-│   ├── App.axaml             ← Avalonia Application (тема)
-│   ├── App.axaml.cs
-│   ├── MainWindow.axaml      ← разметка главного окна
-│   ├── MainWindow.axaml.cs   ← логика GUI
-│   └── ElGamalCipher.cs      ← алгоритм Эль-Гамаля
-└── ElGamalTests.cs            ← тесты алгоритма
+   ├── ElGamalLab/
+   ├── ElGamalLab.csproj    ← проект (.NET 8 + Avalonia)
+   ├── Program.cs            ← точка входа
+   ├── App.axaml             ← Avalonia Application (тема)
+   ├── App.axaml.cs
+   ├── MainWindow.axaml      ← разметка главного окна
+   ├── MainWindow.axaml.cs   ← логика GUI
+   └── ElGamalCipher.cs      ← алгоритм Эль-Гамаля
+
 ```
