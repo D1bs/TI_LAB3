@@ -1,0 +1,174 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="ElGamalLab.MainWindow"
+        Title="Лабораторная работа №3 — Алгоритм Эль-Гамаля (Вариант 2)"
+        Width="900" Height="780"
+        MinWidth="800" MinHeight="700">
+
+  <Window.Styles>
+    <Style Selector="TextBox">
+      <Setter Property="Margin" Value="0,2,0,2"/>
+      <Setter Property="Padding" Value="4,2"/>
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="Margin" Value="4,0"/>
+      <Setter Property="Padding" Value="10,6"/>
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin" Value="0,0,8,0"/>
+    </Style>
+  </Window.Styles>
+
+  <ScrollViewer>
+    <StackPanel Margin="16">
+
+      <!-- Заголовок -->
+      <TextBlock Text="Криптосистема Эль-Гамаля" FontSize="20" FontWeight="Bold"
+                 HorizontalAlignment="Center" Margin="0,0,0,4"/>
+      <TextBlock Text="Шифрование и дешифрование файлов произвольного формата"
+                 FontSize="13" HorizontalAlignment="Center" Foreground="Gray" Margin="0,0,0,16"/>
+
+      <!-- Параметры -->
+      <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6"
+              Padding="12" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock Text="Параметры алгоритма" FontWeight="Bold" FontSize="14" Margin="0,0,0,8"/>
+
+          <!-- p -->
+          <Grid ColumnDefinitions="160,*,Auto" Margin="0,4">
+            <TextBlock Classes="label" Text="p (простое число):"/>
+            <TextBox Grid.Column="1" x:Name="PTextBox" Watermark="Напр.: 41"
+                     TextChanged="Params_TextChanged"/>
+            <TextBlock Grid.Column="2" x:Name="PStatusText" VerticalAlignment="Center"
+                       Margin="8,0,0,0" FontSize="12"/>
+          </Grid>
+
+          <!-- g (первообразные корни) -->
+          <Grid ColumnDefinitions="160,*,Auto" Margin="0,4">
+            <TextBlock Classes="label" Text="g (первообразный корень):"/>
+            <TextBox Grid.Column="1" x:Name="GTextBox" Watermark="Введите p для расчёта"
+                     TextChanged="Params_TextChanged"/>
+            <Button Grid.Column="2" Content="Найти все g" Click="FindRoots_Click"
+                    x:Name="FindRootsBtn" IsEnabled="False"/>
+          </Grid>
+
+          <!-- Вывод первообразных корней -->
+          <Border Background="#F5F5F5" CornerRadius="4" Padding="8" Margin="0,2,0,8">
+            <StackPanel>
+              <TextBlock Text="Все первообразные корни по модулю p:"
+                         FontSize="12" Foreground="Gray" Margin="0,0,0,4"/>
+              <TextBox x:Name="RootsTextBox" IsReadOnly="True" TextWrapping="Wrap"
+                       MaxHeight="60" FontFamily="Monospace" FontSize="11"
+                       Background="Transparent" BorderThickness="0"
+                       Text="(введите p и нажмите «Найти все g»)"/>
+            </StackPanel>
+          </Border>
+
+          <!-- x (закрытый ключ) -->
+          <Grid ColumnDefinitions="160,*" Margin="0,4">
+            <TextBlock Classes="label" Text="x (закрытый ключ):"/>
+            <TextBox Grid.Column="1" x:Name="XTextBox" Watermark="1 &lt; x &lt; p−1"
+                     TextChanged="Params_TextChanged"/>
+          </Grid>
+
+          <!-- k (сеансовый ключ) -->
+          <Grid ColumnDefinitions="160,*" Margin="0,4">
+            <TextBlock Classes="label" Text="k (сеансовый ключ):"/>
+            <TextBox Grid.Column="1" x:Name="KTextBox"
+                     Watermark="1 &lt; k &lt; p−1, НОД(k, p−1)=1"
+                     TextChanged="Params_TextChanged"/>
+          </Grid>
+
+          <!-- Вычисленный открытый ключ -->
+          <Border Background="#EEF6FF" CornerRadius="4" Padding="8" Margin="0,8,0,0">
+            <WrapPanel>
+              <TextBlock Text="Открытый ключ Ko = (p, g, y),  где  y = g^x mod p  = "
+                         VerticalAlignment="Center" FontSize="12"/>
+              <TextBlock x:Name="YValueText" Text="—"
+                         FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/>
+              <TextBlock Text="    Закрытый ключ Kc = (x, p)"
+                         Foreground="Gray" FontSize="12" VerticalAlignment="Center" Margin="16,0,0,0"/>
+            </WrapPanel>
+          </Border>
+
+          <!-- Статус параметров -->
+          <TextBlock x:Name="ParamsStatusText" Foreground="Red" FontSize="12"
+                     TextWrapping="Wrap" Margin="0,8,0,0"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Режим работы -->
+      <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6"
+              Padding="12" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock Text="Режим работы" FontWeight="Bold" FontSize="14" Margin="0,0,0,8"/>
+          <StackPanel Orientation="Horizontal">
+            <RadioButton x:Name="EncryptRadio" Content="Шифрование" IsChecked="True"
+                         GroupName="Mode" Checked="Mode_Changed" FontSize="14" Margin="0,0,24,0"/>
+            <RadioButton x:Name="DecryptRadio" Content="Дешифрование"
+                         GroupName="Mode" Checked="Mode_Changed" FontSize="14"/>
+          </StackPanel>
+          <TextBlock x:Name="ModeHintText"
+                     Text="Входной файл: любой формат. Выходной файл: текст с числами (a b) на каждой строке."
+                     FontSize="11" Foreground="Gray" Margin="0,6,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Файлы -->
+      <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6"
+              Padding="12" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock Text="Файлы" FontWeight="Bold" FontSize="14" Margin="0,0,0,8"/>
+
+          <Grid ColumnDefinitions="120,*,Auto" Margin="0,4">
+            <TextBlock Classes="label" Text="Входной файл:"/>
+            <TextBox Grid.Column="1" x:Name="InputPathBox" IsReadOnly="True"
+                     Watermark="Путь к файлу..." Foreground="Gray"/>
+            <Button Grid.Column="2" Content="Выбрать…" Click="OpenInputFile_Click"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="120,*,Auto" Margin="0,4">
+            <TextBlock Classes="label" Text="Выходной файл:"/>
+            <TextBox Grid.Column="1" x:Name="OutputPathBox" IsReadOnly="True"
+                     Watermark="Путь для сохранения..." Foreground="Gray"/>
+            <Button Grid.Column="2" Content="Выбрать…" Click="ChooseOutputFile_Click"/>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <!-- Кнопка выполнить -->
+      <Button x:Name="ExecuteBtn" Content="▶  Выполнить" FontSize="16" FontWeight="Bold"
+              HorizontalAlignment="Stretch" Height="48" Click="Execute_Click"
+              IsEnabled="False" Margin="0,0,0,12"/>
+
+      <!-- Вывод зашифрованных чисел -->
+      <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6"
+              Padding="12" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock x:Name="CipherOutputLabel"
+                     Text="Содержимое зашифрованного файла (пары a b в 10-й системе):"
+                     FontWeight="Bold" FontSize="13" Margin="0,0,0,6"/>
+          <TextBox x:Name="CipherOutputBox" IsReadOnly="True" TextWrapping="Wrap"
+                   MaxHeight="160" FontFamily="Monospace" FontSize="11"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   Text="(результат появится здесь после шифрования)"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Лог -->
+      <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="6"
+              Padding="12">
+        <StackPanel>
+          <TextBlock Text="Журнал операций:" FontWeight="Bold" FontSize="13" Margin="0,0,0,6"/>
+          <TextBox x:Name="LogBox" IsReadOnly="True" TextWrapping="Wrap"
+                   MaxHeight="140" FontFamily="Monospace" FontSize="11"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   Text=""/>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</Window>
